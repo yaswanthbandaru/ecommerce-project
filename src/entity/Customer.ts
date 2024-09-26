@@ -13,11 +13,23 @@ export class Customer {
     lastName: string 
 
     @Column()
+    email: string
+
+    @Column() 
+    phone: string
+    
+    @Column()
+    password: string
+
+    @Column()
     city: string 
 
     @Column({ nullable: true }) 
     country?: string 
 
-    @Column() 
-    phone: string
+    @Column({ nullable: true })
+    loyaltyPoints?: number
+
+    @Column({nullable: true})
+    lastPurchaseDate: Date 
 }
