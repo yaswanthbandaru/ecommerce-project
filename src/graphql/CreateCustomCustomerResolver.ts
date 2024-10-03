@@ -22,7 +22,7 @@ export const CreateCustomCustomerResolver = {
                 conditions.push({ id });
             }
             const customer = await customerRepository.findOne({ where : conditions.length > 1 ? [{ email }, { phone }, { id }] : conditions[0] })
-
+            customer.password = decrypt(customer.password)
             return customer
         }
     },

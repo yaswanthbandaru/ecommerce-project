@@ -18,12 +18,12 @@ export function encrypt(text: string): EncryptedDate {
     return { iv: iv.toString('hex'), encryptedData: encrypted.toString('hex') }
 }
 
-export function decrypt(text: EncryptedDate): string {
+export function decrypt(text: string): string {
     const secret_key = process.env.SECRET_TEXT 
     const secret_iv = process.env.CRYPTO_IV 
     const key = Buffer.from(secret_key, 'hex')
     const iv =  Buffer.from(secret_iv, 'hex')
-    let encryptedText = Buffer.from(text.encryptedData, 'hex')
+    let encryptedText = Buffer.from(text, 'hex')
     let decipher = cryptoencryption.createDecipheriv(algorithm, Buffer.from(key), iv)
     let decrypted = decipher.update(encryptedText)
     decrypted = Buffer.concat([decrypted, decipher.final()])
