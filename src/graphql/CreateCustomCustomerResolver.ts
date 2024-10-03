@@ -3,8 +3,8 @@ import * as Chance from 'chance'
 import { checkEmailExists } from "../service/CheckCustomerExists"
 import { AppDataSource } from "../data-source"
 import { Customer } from "../entity/Customer"
-import Cryptr = require("cryptr")
 import { Query } from "pg"
+import { decrypt, encrypt } from "../service/crypto"
 
 export const CreateCustomCustomerResolver = {
     Query: {
@@ -32,12 +32,6 @@ export const CreateCustomCustomerResolver = {
 
             logger.info(`${process.env.JWT_SECRET}`)
 
-            const cryptr = new Cryptr(process.env.JWT_SECRET) 
-
-            // const encryptedPassword = cryptr.encrypt('bacon')
-            // logger.info(`Password \'bacon\' is encrypted as: ${encryptedPassword}`)
-            // logger.info(`${encryptedPassword} is decrypted as: ${cryptr.decrypt(encryptedPassword)}`)
-
             var chance = new Chance()
             const name =  chance.name().split(' ')
             const phonenumber = chance.phone()
@@ -53,7 +47,7 @@ export const CreateCustomCustomerResolver = {
                 country: 'UK',
                 phone: phonenumber,
                 email: email,
-                password: password
+                password: encrypt(password).encryptedData
             }
 
             let bool = await checkEmailExists(email)
