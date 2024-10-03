@@ -1,3 +1,6 @@
+import { CreateCustomCustomerPlugin } from "./plugins/CreateCustomCustomerPlugin"
+import { CustomLoginPlugin } from "./plugins/CustomLoginPlugin"
+
 const { postgraphile } = require('postgraphile')
 
 module.exports = postgraphile(
@@ -8,6 +11,7 @@ module.exports = postgraphile(
 		graphiql: true,
 		enhanceGraphiql: true,
 		dynamicJson: true,
+		appendPlugins: [CreateCustomCustomerPlugin, CustomLoginPlugin],
 		exportGqlSchemaPath: './src/generated/schema.graphql',
 	}
 )

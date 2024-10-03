@@ -14,7 +14,12 @@
     "typescript": "^5.6.2"
   },
   "dependencies": {
+    "bcrypt": "^5.1.1",
+    "chance": "^1.1.12",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.4.5",
     "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.0",
     "postgraphile": "^4.13.0",
     "typeorm": "^0.3.20",
