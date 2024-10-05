@@ -196,7 +196,7 @@ type Query implements Node {
     """The globally unique `ID` to be used in selecting a single `Supplier`."""
     nodeId: ID!
   ): Supplier
-  customCustomer(email: String, phone: String, id: Int): Customer
+  customCustomer(email: String, phone: String, id: Int): queryPayload
 }
 
 """An object with a globally unique `ID`."""
@@ -782,6 +782,14 @@ input SupplierCondition {
 
   """Checks for equality with the object’s `fax` field."""
   fax: String
+}
+
+type queryPayload {
+  email: String
+  password: String
+  lastName: String
+  firstName: String
+  id: Int
 }
 
 """

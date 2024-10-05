@@ -1,3 +1,5 @@
+import { logger } from "../logger";
+
 require('dotenv').config()
 const cryptoencryption = require('crypto')
 const algorithm = 'aes-256-cbc'
@@ -15,6 +17,7 @@ export function encrypt(text: string): EncryptedDate {
     let cipher = cryptoencryption.createCipheriv(algorithm, Buffer.from(key), iv)
     let encrypted = cipher.update(text)
     encrypted = Buffer.concat([encrypted, cipher.final()])
+    logger.info("Encrypting the password for the database")
     return { iv: iv.toString('hex'), encryptedData: encrypted.toString('hex') }
 }
 
@@ -26,6 +29,7 @@ export function decrypt(text: string): string {
     let encryptedText = Buffer.from(text, 'hex')
     let decipher = cryptoencryption.createDecipheriv(algorithm, Buffer.from(key), iv)
     let decrypted = decipher.update(encryptedText)
+    logger.info("Decrypting the password from the database")
     decrypted = Buffer.concat([decrypted, decipher.final()])
     return decrypted.toString()
 }

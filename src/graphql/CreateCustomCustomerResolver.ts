@@ -22,8 +22,15 @@ export const CreateCustomCustomerResolver = {
                 conditions.push({ id });
             }
             const customer = await customerRepository.findOne({ where : conditions.length > 1 ? [{ email }, { phone }, { id }] : conditions[0] })
-            customer.password = decrypt(customer.password)
-            return customer
+            logger.warn('Customer password:', decrypt(customer.password))
+            const decryptedPassword = await decrypt(customer.password)
+            return {
+                id: customer.id,
+                email: customer.email, 
+                password: decryptedPassword,
+                firstName: customer.firstName,
+                lastName: customer.lastName
+            } 
         }
     },
     Mutation: {
@@ -35,8 +42,8 @@ export const CreateCustomCustomerResolver = {
             var chance = new Chance()
             const name =  chance.name().split(' ')
             const phonenumber = chance.phone()
-            const firstname = name[0]
-            const lastname = name[1]
+            const firstname = firstName
+            const lastname = lastName
             logger.warn(lastname)
             
 
@@ -51,11 +58,13 @@ export const CreateCustomCustomerResolver = {
             }
 
             let bool = await checkEmailExists(email)
-            logger.warn(`Does ${email} exist in Database?: ${bool}`)
+            logger.warn(`Does ${email} exist in Database?: ${!bool}`)
+            logger.warn(`Password is ${password} and encryped password is ${encrypt(password).encryptedData} \n Decrypted password is: ${decrypt(encrypt(password).encryptedData)}`)
 
             const customerRepository = AppDataSource.getRepository(Customer)
             const customer = customerRepository.create(newCustomer)
             await customerRepository.save(customer)
+            console.log("Customer:", customer)
             return customer
         }
     }

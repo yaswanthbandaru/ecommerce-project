@@ -1,12 +1,20 @@
 import { gql } from "postgraphile";
 
 export const CreateCustomCustomerSchema = gql`
+    type queryPayload {
+        email: String
+        password: String
+        lastName: String 
+        firstName: String
+        id: Int 
+    }
+
     extend type Query {
         customCustomer(
             email: String
             phone: String
             id: Int
-        ): Customer 
+        ): queryPayload
     }
 
     extend type Mutation {
