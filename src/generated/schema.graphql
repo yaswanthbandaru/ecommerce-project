@@ -17,6 +17,35 @@ type Query implements Node {
     nodeId: ID!
   ): Node
 
+  """Reads and enables pagination through a set of `Cart`."""
+  allCarts(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Cart`."""
+    orderBy: [CartsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: CartCondition
+  ): CartsConnection
+
   """Reads and enables pagination through a set of `Customer`."""
   allCustomers(
     """Only read the first `n` values of the set."""
@@ -161,11 +190,18 @@ type Query implements Node {
     """
     condition: SupplierCondition
   ): SuppliersConnection
+  cartById(id: Int!): Cart
   customerById(id: Int!): Customer
   orderById(id: Int!): Order
   orderItemById(id: Int!): OrderItem
   productById(id: Int!): Product
   supplierById(id: Int!): Supplier
+
+  """Reads a single `Cart` using its globally unique `ID`."""
+  cart(
+    """The globally unique `ID` to be used in selecting a single `Cart`."""
+    nodeId: ID!
+  ): Cart
 
   """Reads a single `Customer` using its globally unique `ID`."""
   customer(
@@ -205,6 +241,105 @@ interface Node {
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
+}
+
+"""A connection to a list of `Cart` values."""
+type CartsConnection {
+  """A list of `Cart` objects."""
+  nodes: [Cart]!
+
+  """
+  A list of edges which contains the `Cart` and cursor to aid in pagination.
+  """
+  edges: [CartsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Cart` you could get from the connection."""
+  totalCount: Int!
+}
+
+type Cart implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  quantity: Int!
+  createdAt: Datetime!
+  modifiedAt: Datetime!
+  description: String
+}
+
+"""
+A point in time as described by the [ISO
+8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone.
+"""
+scalar Datetime
+
+"""A `Cart` edge in the connection."""
+type CartsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Cart` at the end of the edge."""
+  node: Cart
+}
+
+"""A location in a connection that can be used for resuming pagination."""
+scalar Cursor
+
+"""Information about pagination in a connection."""
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: Cursor
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: Cursor
+}
+
+"""Methods to use when ordering `Cart`."""
+enum CartsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  QUANTITY_ASC
+  QUANTITY_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  MODIFIED_AT_ASC
+  MODIFIED_AT_DESC
+  DESCRIPTION_ASC
+  DESCRIPTION_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Cart` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input CartCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `quantity` field."""
+  quantity: Int
+
+  """Checks for equality with the object’s `createdAt` field."""
+  createdAt: Datetime
+
+  """Checks for equality with the object’s `modifiedAt` field."""
+  modifiedAt: Datetime
+
+  """Checks for equality with the object’s `description` field."""
+  description: String
 }
 
 """A connection to a list of `Customer` values."""
@@ -269,12 +404,6 @@ type Customer implements Node {
     condition: OrderCondition
   ): OrdersConnection!
 }
-
-"""
-A point in time as described by the [ISO
-8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone.
-"""
-scalar Datetime
 
 """A connection to a list of `Order` values."""
 type OrdersConnection {
@@ -488,24 +617,6 @@ type ProductsEdge {
 
   """The `Product` at the end of the edge."""
   node: Product
-}
-
-"""A location in a connection that can be used for resuming pagination."""
-scalar Cursor
-
-"""Information about pagination in a connection."""
-type PageInfo {
-  """When paginating forwards, are there more items?"""
-  hasNextPage: Boolean!
-
-  """When paginating backwards, are there more items?"""
-  hasPreviousPage: Boolean!
-
-  """When paginating backwards, the cursor to continue."""
-  startCursor: Cursor
-
-  """When paginating forwards, the cursor to continue."""
-  endCursor: Cursor
 }
 
 """Methods to use when ordering `Product`."""
@@ -796,6 +907,14 @@ type queryPayload {
 The root mutation type which contains root level fields which mutate data.
 """
 type Mutation {
+  """Creates a single `Cart`."""
+  createCart(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateCartInput!
+  ): CreateCartPayload
+
   """Creates a single `Customer`."""
   createCustomer(
     """
@@ -835,6 +954,22 @@ type Mutation {
     """
     input: CreateSupplierInput!
   ): CreateSupplierPayload
+
+  """Updates a single `Cart` using its globally unique id and a patch."""
+  updateCart(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateCartInput!
+  ): UpdateCartPayload
+
+  """Updates a single `Cart` using a unique key and a patch."""
+  updateCartById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateCartByIdInput!
+  ): UpdateCartPayload
 
   """Updates a single `Customer` using its globally unique id and a patch."""
   updateCustomer(
@@ -916,6 +1051,22 @@ type Mutation {
     input: UpdateSupplierByIdInput!
   ): UpdateSupplierPayload
 
+  """Deletes a single `Cart` using its globally unique id."""
+  deleteCart(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteCartInput!
+  ): DeleteCartPayload
+
+  """Deletes a single `Cart` using a unique key."""
+  deleteCartById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteCartByIdInput!
+  ): DeleteCartPayload
+
   """Deletes a single `Customer` using its globally unique id."""
   deleteCustomer(
     """
@@ -996,7 +1147,51 @@ type Mutation {
     input: DeleteSupplierByIdInput!
   ): DeleteSupplierPayload
   createCustomCustomer(firstName: String!, lastName: String!, city: String!, country: String, phone: String!, email: String!, password: String!, lastPurchaseDate: Datetime): Customer
-  login(email: String!, password: String!): String
+  login(email: String!, password: String!): LoginPayload
+}
+
+"""The output of our create `Cart` mutation."""
+type CreateCartPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Cart` that was created by this mutation."""
+  cart: Cart
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Cart`. May be used by Relay 1."""
+  cartEdge(
+    """The method to use when ordering `Cart`."""
+    orderBy: [CartsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): CartsEdge
+}
+
+"""All input for the create `Cart` mutation."""
+input CreateCartInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Cart` to be created by this mutation."""
+  cart: CartInput!
+}
+
+"""An input for mutations affecting `Cart`"""
+input CartInput {
+  id: Int
+  quantity: Int!
+  createdAt: Datetime!
+  modifiedAt: Datetime!
+  description: String
 }
 
 """The output of our create `Customer` mutation."""
@@ -1236,6 +1431,72 @@ input SupplierInput {
   country: String!
   phone: String!
   fax: String!
+}
+
+"""The output of our update `Cart` mutation."""
+type UpdateCartPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Cart` that was updated by this mutation."""
+  cart: Cart
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Cart`. May be used by Relay 1."""
+  cartEdge(
+    """The method to use when ordering `Cart`."""
+    orderBy: [CartsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): CartsEdge
+}
+
+"""All input for the `updateCart` mutation."""
+input UpdateCartInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Cart` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `Cart` being updated.
+  """
+  cartPatch: CartPatch!
+}
+
+"""Represents an update to a `Cart`. Fields that are set will be updated."""
+input CartPatch {
+  id: Int
+  quantity: Int
+  createdAt: Datetime
+  modifiedAt: Datetime
+  description: String
+}
+
+"""All input for the `updateCartById` mutation."""
+input UpdateCartByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `Cart` being updated.
+  """
+  cartPatch: CartPatch!
+  id: Int!
 }
 
 """The output of our update `Customer` mutation."""
@@ -1597,6 +1858,54 @@ input UpdateSupplierByIdInput {
   id: Int!
 }
 
+"""The output of our delete `Cart` mutation."""
+type DeleteCartPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Cart` that was deleted by this mutation."""
+  cart: Cart
+  deletedCartId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Cart`. May be used by Relay 1."""
+  cartEdge(
+    """The method to use when ordering `Cart`."""
+    orderBy: [CartsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): CartsEdge
+}
+
+"""All input for the `deleteCart` mutation."""
+input DeleteCartInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Cart` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deleteCartById` mutation."""
+input DeleteCartByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
 """The output of our delete `Customer` mutation."""
 type DeleteCustomerPayload {
   """
@@ -1847,4 +2156,13 @@ input DeleteSupplierByIdInput {
   """
   clientMutationId: String
   id: Int!
+}
+
+type LoginPayload {
+  jwtToken: JwtToken
+}
+
+type JwtToken {
+  token: String
+  userId: Int
 }
