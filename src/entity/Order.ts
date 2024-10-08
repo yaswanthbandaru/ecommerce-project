@@ -18,4 +18,13 @@ export class Order {
 
     @OneToMany(() => OrderItem, (orderitem) => orderitem.order)
     orderItems: OrderItem[]
+
+    @Column()
+    isCompleted: boolean
+
+    @Column()
+    isPaymentSuccessful: boolean
+
+    @Column()
+    paymentType: string  // for upi, credit, debit, cod 
 }

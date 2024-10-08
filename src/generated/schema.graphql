@@ -75,6 +75,35 @@ type Query implements Node {
     condition: CustomerCondition
   ): CustomersConnection
 
+  """Reads and enables pagination through a set of `Discount`."""
+  allDiscounts(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Discount`."""
+    orderBy: [DiscountsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DiscountCondition
+  ): DiscountsConnection
+
   """Reads and enables pagination through a set of `Order`."""
   allOrders(
     """Only read the first `n` values of the set."""
@@ -190,12 +219,43 @@ type Query implements Node {
     """
     condition: SupplierCondition
   ): SuppliersConnection
+
+  """Reads and enables pagination through a set of `Wishlist`."""
+  allWishlists(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Wishlist`."""
+    orderBy: [WishlistsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: WishlistCondition
+  ): WishlistsConnection
   cartById(id: Int!): Cart
   customerById(id: Int!): Customer
+  discountById(id: Int!): Discount
   orderById(id: Int!): Order
   orderItemById(id: Int!): OrderItem
   productById(id: Int!): Product
   supplierById(id: Int!): Supplier
+  wishlistById(id: Int!): Wishlist
 
   """Reads a single `Cart` using its globally unique `ID`."""
   cart(
@@ -208,6 +268,12 @@ type Query implements Node {
     """The globally unique `ID` to be used in selecting a single `Customer`."""
     nodeId: ID!
   ): Customer
+
+  """Reads a single `Discount` using its globally unique `ID`."""
+  discount(
+    """The globally unique `ID` to be used in selecting a single `Discount`."""
+    nodeId: ID!
+  ): Discount
 
   """Reads a single `Order` using its globally unique `ID`."""
   order(
@@ -232,6 +298,12 @@ type Query implements Node {
     """The globally unique `ID` to be used in selecting a single `Supplier`."""
     nodeId: ID!
   ): Supplier
+
+  """Reads a single `Wishlist` using its globally unique `ID`."""
+  wishlist(
+    """The globally unique `ID` to be used in selecting a single `Wishlist`."""
+    nodeId: ID!
+  ): Wishlist
   customCustomer(email: String, phone: String, id: Int): queryPayload
 }
 
@@ -269,7 +341,6 @@ type Cart implements Node {
   quantity: Int!
   createdAt: Datetime!
   modifiedAt: Datetime!
-  description: String
 }
 
 """
@@ -316,8 +387,6 @@ enum CartsOrderBy {
   CREATED_AT_DESC
   MODIFIED_AT_ASC
   MODIFIED_AT_DESC
-  DESCRIPTION_ASC
-  DESCRIPTION_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
 }
@@ -337,9 +406,6 @@ input CartCondition {
 
   """Checks for equality with the object’s `modifiedAt` field."""
   modifiedAt: Datetime
-
-  """Checks for equality with the object’s `description` field."""
-  description: String
 }
 
 """A connection to a list of `Customer` values."""
@@ -431,6 +497,9 @@ type Order implements Node {
   orderDate: Datetime!
   totalAmount: BigFloat!
   customerId: Int
+  isCompleted: Boolean!
+  isPaymentSuccessful: Boolean!
+  paymentType: String!
 
   """Reads a single `Customer` that is related to this `Order`."""
   customerByCustomerId: Customer
@@ -728,6 +797,12 @@ enum OrdersOrderBy {
   TOTAL_AMOUNT_DESC
   CUSTOMER_ID_ASC
   CUSTOMER_ID_DESC
+  IS_COMPLETED_ASC
+  IS_COMPLETED_DESC
+  IS_PAYMENT_SUCCESSFUL_ASC
+  IS_PAYMENT_SUCCESSFUL_DESC
+  PAYMENT_TYPE_ASC
+  PAYMENT_TYPE_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
 }
@@ -747,6 +822,15 @@ input OrderCondition {
 
   """Checks for equality with the object’s `customerId` field."""
   customerId: Int
+
+  """Checks for equality with the object’s `isCompleted` field."""
+  isCompleted: Boolean
+
+  """Checks for equality with the object’s `isPaymentSuccessful` field."""
+  isPaymentSuccessful: Boolean
+
+  """Checks for equality with the object’s `paymentType` field."""
+  paymentType: String
 }
 
 """A `Customer` edge in the connection."""
@@ -819,6 +903,82 @@ input CustomerCondition {
 
   """Checks for equality with the object’s `lastPurchaseDate` field."""
   lastPurchaseDate: Datetime
+}
+
+"""A connection to a list of `Discount` values."""
+type DiscountsConnection {
+  """A list of `Discount` objects."""
+  nodes: [Discount]!
+
+  """
+  A list of edges which contains the `Discount` and cursor to aid in pagination.
+  """
+  edges: [DiscountsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Discount` you could get from the connection."""
+  totalCount: Int!
+}
+
+type Discount implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  description: String
+  quantity: Int!
+  createdAt: Datetime!
+  modifiedAt: Datetime!
+}
+
+"""A `Discount` edge in the connection."""
+type DiscountsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Discount` at the end of the edge."""
+  node: Discount
+}
+
+"""Methods to use when ordering `Discount`."""
+enum DiscountsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  DESCRIPTION_ASC
+  DESCRIPTION_DESC
+  QUANTITY_ASC
+  QUANTITY_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  MODIFIED_AT_ASC
+  MODIFIED_AT_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Discount` object types. All fields are tested
+for equality and combined with a logical ‘and.’
+"""
+input DiscountCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `description` field."""
+  description: String
+
+  """Checks for equality with the object’s `quantity` field."""
+  quantity: Int
+
+  """Checks for equality with the object’s `createdAt` field."""
+  createdAt: Datetime
+
+  """Checks for equality with the object’s `modifiedAt` field."""
+  modifiedAt: Datetime
 }
 
 """A connection to a list of `Supplier` values."""
@@ -895,6 +1055,76 @@ input SupplierCondition {
   fax: String
 }
 
+"""A connection to a list of `Wishlist` values."""
+type WishlistsConnection {
+  """A list of `Wishlist` objects."""
+  nodes: [Wishlist]!
+
+  """
+  A list of edges which contains the `Wishlist` and cursor to aid in pagination.
+  """
+  edges: [WishlistsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Wishlist` you could get from the connection."""
+  totalCount: Int!
+}
+
+type Wishlist implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  quantity: Int!
+  createdAt: Datetime!
+  modifiedAt: Datetime!
+}
+
+"""A `Wishlist` edge in the connection."""
+type WishlistsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Wishlist` at the end of the edge."""
+  node: Wishlist
+}
+
+"""Methods to use when ordering `Wishlist`."""
+enum WishlistsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  QUANTITY_ASC
+  QUANTITY_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  MODIFIED_AT_ASC
+  MODIFIED_AT_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Wishlist` object types. All fields are tested
+for equality and combined with a logical ‘and.’
+"""
+input WishlistCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `quantity` field."""
+  quantity: Int
+
+  """Checks for equality with the object’s `createdAt` field."""
+  createdAt: Datetime
+
+  """Checks for equality with the object’s `modifiedAt` field."""
+  modifiedAt: Datetime
+}
+
 type queryPayload {
   email: String
   password: String
@@ -922,6 +1152,14 @@ type Mutation {
     """
     input: CreateCustomerInput!
   ): CreateCustomerPayload
+
+  """Creates a single `Discount`."""
+  createDiscount(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateDiscountInput!
+  ): CreateDiscountPayload
 
   """Creates a single `Order`."""
   createOrder(
@@ -955,6 +1193,14 @@ type Mutation {
     input: CreateSupplierInput!
   ): CreateSupplierPayload
 
+  """Creates a single `Wishlist`."""
+  createWishlist(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateWishlistInput!
+  ): CreateWishlistPayload
+
   """Updates a single `Cart` using its globally unique id and a patch."""
   updateCart(
     """
@@ -986,6 +1232,22 @@ type Mutation {
     """
     input: UpdateCustomerByIdInput!
   ): UpdateCustomerPayload
+
+  """Updates a single `Discount` using its globally unique id and a patch."""
+  updateDiscount(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateDiscountInput!
+  ): UpdateDiscountPayload
+
+  """Updates a single `Discount` using a unique key and a patch."""
+  updateDiscountById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateDiscountByIdInput!
+  ): UpdateDiscountPayload
 
   """Updates a single `Order` using its globally unique id and a patch."""
   updateOrder(
@@ -1051,6 +1313,22 @@ type Mutation {
     input: UpdateSupplierByIdInput!
   ): UpdateSupplierPayload
 
+  """Updates a single `Wishlist` using its globally unique id and a patch."""
+  updateWishlist(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateWishlistInput!
+  ): UpdateWishlistPayload
+
+  """Updates a single `Wishlist` using a unique key and a patch."""
+  updateWishlistById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateWishlistByIdInput!
+  ): UpdateWishlistPayload
+
   """Deletes a single `Cart` using its globally unique id."""
   deleteCart(
     """
@@ -1082,6 +1360,22 @@ type Mutation {
     """
     input: DeleteCustomerByIdInput!
   ): DeleteCustomerPayload
+
+  """Deletes a single `Discount` using its globally unique id."""
+  deleteDiscount(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteDiscountInput!
+  ): DeleteDiscountPayload
+
+  """Deletes a single `Discount` using a unique key."""
+  deleteDiscountById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteDiscountByIdInput!
+  ): DeleteDiscountPayload
 
   """Deletes a single `Order` using its globally unique id."""
   deleteOrder(
@@ -1146,8 +1440,25 @@ type Mutation {
     """
     input: DeleteSupplierByIdInput!
   ): DeleteSupplierPayload
+
+  """Deletes a single `Wishlist` using its globally unique id."""
+  deleteWishlist(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteWishlistInput!
+  ): DeleteWishlistPayload
+
+  """Deletes a single `Wishlist` using a unique key."""
+  deleteWishlistById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteWishlistByIdInput!
+  ): DeleteWishlistPayload
   createCustomCustomer(firstName: String!, lastName: String!, city: String!, country: String, phone: String!, email: String!, password: String!, lastPurchaseDate: Datetime): Customer
   login(email: String!, password: String!): LoginPayload
+  checkout(userId: Int): CheckoutPayLoad!
 }
 
 """The output of our create `Cart` mutation."""
@@ -1191,7 +1502,6 @@ input CartInput {
   quantity: Int!
   createdAt: Datetime!
   modifiedAt: Datetime!
-  description: String
 }
 
 """The output of our create `Customer` mutation."""
@@ -1243,6 +1553,50 @@ input CustomerInput {
   lastPurchaseDate: Datetime
 }
 
+"""The output of our create `Discount` mutation."""
+type CreateDiscountPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Discount` that was created by this mutation."""
+  discount: Discount
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Discount`. May be used by Relay 1."""
+  discountEdge(
+    """The method to use when ordering `Discount`."""
+    orderBy: [DiscountsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): DiscountsEdge
+}
+
+"""All input for the create `Discount` mutation."""
+input CreateDiscountInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Discount` to be created by this mutation."""
+  discount: DiscountInput!
+}
+
+"""An input for mutations affecting `Discount`"""
+input DiscountInput {
+  id: Int
+  description: String
+  quantity: Int!
+  createdAt: Datetime!
+  modifiedAt: Datetime!
+}
+
 """The output of our create `Order` mutation."""
 type CreateOrderPayload {
   """
@@ -1287,6 +1641,9 @@ input OrderInput {
   orderDate: Datetime!
   totalAmount: BigFloat!
   customerId: Int
+  isCompleted: Boolean!
+  isPaymentSuccessful: Boolean!
+  paymentType: String!
 }
 
 """The output of our create `OrderItem` mutation."""
@@ -1433,6 +1790,49 @@ input SupplierInput {
   fax: String!
 }
 
+"""The output of our create `Wishlist` mutation."""
+type CreateWishlistPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Wishlist` that was created by this mutation."""
+  wishlist: Wishlist
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Wishlist`. May be used by Relay 1."""
+  wishlistEdge(
+    """The method to use when ordering `Wishlist`."""
+    orderBy: [WishlistsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): WishlistsEdge
+}
+
+"""All input for the create `Wishlist` mutation."""
+input CreateWishlistInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Wishlist` to be created by this mutation."""
+  wishlist: WishlistInput!
+}
+
+"""An input for mutations affecting `Wishlist`"""
+input WishlistInput {
+  id: Int
+  quantity: Int!
+  createdAt: Datetime!
+  modifiedAt: Datetime!
+}
+
 """The output of our update `Cart` mutation."""
 type UpdateCartPayload {
   """
@@ -1481,7 +1881,6 @@ input CartPatch {
   quantity: Int
   createdAt: Datetime
   modifiedAt: Datetime
-  description: String
 }
 
 """All input for the `updateCartById` mutation."""
@@ -1572,6 +1971,74 @@ input UpdateCustomerByIdInput {
   id: Int!
 }
 
+"""The output of our update `Discount` mutation."""
+type UpdateDiscountPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Discount` that was updated by this mutation."""
+  discount: Discount
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Discount`. May be used by Relay 1."""
+  discountEdge(
+    """The method to use when ordering `Discount`."""
+    orderBy: [DiscountsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): DiscountsEdge
+}
+
+"""All input for the `updateDiscount` mutation."""
+input UpdateDiscountInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Discount` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `Discount` being updated.
+  """
+  discountPatch: DiscountPatch!
+}
+
+"""
+Represents an update to a `Discount`. Fields that are set will be updated.
+"""
+input DiscountPatch {
+  id: Int
+  description: String
+  quantity: Int
+  createdAt: Datetime
+  modifiedAt: Datetime
+}
+
+"""All input for the `updateDiscountById` mutation."""
+input UpdateDiscountByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `Discount` being updated.
+  """
+  discountPatch: DiscountPatch!
+  id: Int!
+}
+
 """The output of our update `Order` mutation."""
 type UpdateOrderPayload {
   """
@@ -1625,6 +2092,9 @@ input OrderPatch {
   orderDate: Datetime
   totalAmount: BigFloat
   customerId: Int
+  isCompleted: Boolean
+  isPaymentSuccessful: Boolean
+  paymentType: String
 }
 
 """All input for the `updateOrderById` mutation."""
@@ -1858,6 +2328,73 @@ input UpdateSupplierByIdInput {
   id: Int!
 }
 
+"""The output of our update `Wishlist` mutation."""
+type UpdateWishlistPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Wishlist` that was updated by this mutation."""
+  wishlist: Wishlist
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Wishlist`. May be used by Relay 1."""
+  wishlistEdge(
+    """The method to use when ordering `Wishlist`."""
+    orderBy: [WishlistsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): WishlistsEdge
+}
+
+"""All input for the `updateWishlist` mutation."""
+input UpdateWishlistInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Wishlist` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `Wishlist` being updated.
+  """
+  wishlistPatch: WishlistPatch!
+}
+
+"""
+Represents an update to a `Wishlist`. Fields that are set will be updated.
+"""
+input WishlistPatch {
+  id: Int
+  quantity: Int
+  createdAt: Datetime
+  modifiedAt: Datetime
+}
+
+"""All input for the `updateWishlistById` mutation."""
+input UpdateWishlistByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `Wishlist` being updated.
+  """
+  wishlistPatch: WishlistPatch!
+  id: Int!
+}
+
 """The output of our delete `Cart` mutation."""
 type DeleteCartPayload {
   """
@@ -1946,6 +2483,54 @@ input DeleteCustomerInput {
 
 """All input for the `deleteCustomerById` mutation."""
 input DeleteCustomerByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""The output of our delete `Discount` mutation."""
+type DeleteDiscountPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Discount` that was deleted by this mutation."""
+  discount: Discount
+  deletedDiscountId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Discount`. May be used by Relay 1."""
+  discountEdge(
+    """The method to use when ordering `Discount`."""
+    orderBy: [DiscountsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): DiscountsEdge
+}
+
+"""All input for the `deleteDiscount` mutation."""
+input DeleteDiscountInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Discount` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deleteDiscountById` mutation."""
+input DeleteDiscountByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -2158,6 +2743,54 @@ input DeleteSupplierByIdInput {
   id: Int!
 }
 
+"""The output of our delete `Wishlist` mutation."""
+type DeleteWishlistPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Wishlist` that was deleted by this mutation."""
+  wishlist: Wishlist
+  deletedWishlistId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Wishlist`. May be used by Relay 1."""
+  wishlistEdge(
+    """The method to use when ordering `Wishlist`."""
+    orderBy: [WishlistsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): WishlistsEdge
+}
+
+"""All input for the `deleteWishlist` mutation."""
+input DeleteWishlistInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Wishlist` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deleteWishlistById` mutation."""
+input DeleteWishlistByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
 type LoginPayload {
   jwtToken: JwtToken
 }
@@ -2165,4 +2798,10 @@ type LoginPayload {
 type JwtToken {
   token: String
   userId: Int
+}
+
+type CheckoutPayLoad {
+  totalAmount: Int
+  isPaymentSuccessful: Boolean
+  orderItems: [OrderItem]
 }
