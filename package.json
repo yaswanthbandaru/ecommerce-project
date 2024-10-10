@@ -26,6 +26,7 @@
     "winston": "^3.14.2"
   },
   "scripts": {
+    "build": "tsc && node build/index.js",
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
     "typeorm": "typeorm-ts-node-commonjs ",
