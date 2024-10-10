@@ -1,3 +1,4 @@
+import { CheckoutPlugin } from "./plugins/CheckoutPlugin"
 import { CreateCustomCustomerPlugin } from "./plugins/CreateCustomCustomerPlugin"
 import { CustomLoginPlugin } from "./plugins/CustomLoginPlugin"
 
@@ -11,7 +12,7 @@ module.exports = postgraphile(
 		graphiql: true,
 		enhanceGraphiql: true,
 		dynamicJson: true,
-		appendPlugins: [CreateCustomCustomerPlugin, CustomLoginPlugin],
+		appendPlugins: [CreateCustomCustomerPlugin, CustomLoginPlugin, CheckoutPlugin],
 		exportGqlSchemaPath: './src/generated/schema.graphql',
 	}
 )
