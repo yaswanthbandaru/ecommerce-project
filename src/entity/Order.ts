@@ -27,4 +27,7 @@ export class Order {
 
     @Column()
     paymentType: string  // for upi, credit, debit, cod 
+
+    @Column()
+    isOrderConfirmed: boolean
 }

@@ -585,6 +585,7 @@ type Product implements Node {
   package: String!
   isDiscontinued: Boolean!
   supplierId: Int
+  availableQuantity: Int
 
   """Reads a single `Supplier` that is related to this `Product`."""
   supplierBySupplierId: Supplier
@@ -703,6 +704,8 @@ enum ProductsOrderBy {
   IS_DISCONTINUED_DESC
   SUPPLIER_ID_ASC
   SUPPLIER_ID_DESC
+  AVAILABLE_QUANTITY_ASC
+  AVAILABLE_QUANTITY_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
 }
@@ -728,6 +731,9 @@ input ProductCondition {
 
   """Checks for equality with the object’s `supplierId` field."""
   supplierId: Int
+
+  """Checks for equality with the object’s `availableQuantity` field."""
+  availableQuantity: Int
 }
 
 """Methods to use when ordering `OrderItem`."""
@@ -1742,6 +1748,7 @@ input ProductInput {
   package: String!
   isDiscontinued: Boolean!
   supplierId: Int
+  availableQuantity: Int
 }
 
 """The output of our create `Supplier` mutation."""
@@ -2241,6 +2248,7 @@ input ProductPatch {
   package: String
   isDiscontinued: Boolean
   supplierId: Int
+  availableQuantity: Int
 }
 
 """All input for the `updateProductById` mutation."""

@@ -20,7 +20,10 @@ export class Product {
     package: string 
 
     @Column()
-    isDiscontinued: boolean 
+    isDiscontinued: boolean
+
+    @Column({ nullable: true })
+    availableQuantity?: number
 
     @OneToMany(() => OrderItem, (orderitem) => orderitem.product)
     orderItems: OrderItem[]
